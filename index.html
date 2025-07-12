@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Live News Feed Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #e0e5ec;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      font-size: 3rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #1e3c72, #2a5298);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .rss {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px;
+    }
+    .feed {
+      position: relative;
+      background: #f6f8fa;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 8px 8px 16px #c1c4c8, -8px -8px 16px #ffffff;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+    .feed:hover {
+      transform: translateY(-8px);
+      box-shadow: 12px 12px 24px #bbbfc3, -12px -12px 24px #ffffff;
+    }
+    .feed::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at top left, rgba(26, 85, 194, 0.1), transparent 70%);
+      transform: rotate(45deg);
+    }
+    .feed h3 {
+      position: relative;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #1a327c;
+    }
+    .feed ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+    .feed li {
+      margin-bottom: 10px;
+    }
+    .feed a {
+      text-decoration: none;
+      color: #1e3c72;
+      font-weight: 500;
+    }
+    .feed a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Live News Feed Dashboard</h1>
+<div class="rss">
+  <div class="feed" id="feed-ap-top"><h3>📰 AP News – Top Stories</h3></div>
+  <div class="feed" id="feed-ap-politics"><h3>🏛️ AP News – Politics</h3></div>
+  <div class="feed" id="feed-wapo-politics"><h3>🗞️ Washington Post – Politics</h3></div>
+  <div class="feed" id="feed-nyt-home"><h3>🔖 NYT – Home</h3></div>
+  <div class="feed" id="feed-nyt-politics"><h3>⚖️ NYT – Politics</h3></div>
+  <div class="feed" id="feed-sds"><h3>🏈 SDS – College Football</h3></div>
+  <div class="feed" id="feed-yahoo"><h3>🏟️ Yahoo Sports – CFB</h3></div>
+  <div class="feed" id="feed-pgohub"><h3>🎮 Pokémon GO Hub</h3></div>
+  <div class="feed" id="feed-mit-ai"><h3>🤖 MIT Tech Review – AI</h3></div>
+  <div class="feed" id="feed-openai"><h3>🧠 OpenAI Blog</h3></div>
+</div>
+
+<script>
+  async function loadFeed(url, containerId) {
+    try {
+      const res = await fetch("https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(url));
+      const data = await res.json();
+      const container = document.getElementById(containerId);
+      if (!data.items) return;
+      const ul = document.createElement("ul");
+      data.items.slice(0, 5).forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
+        ul.appendChild(li);
+      });
+      container.appendChild(ul);
+    } catch (e) {
+      console.error("Failed to load feed:", url);
+    }
+  }
+
+  loadFeed("https://news.google.com/rss/search?q=site:apnews.com", "feed-ap-top");
+  loadFeed("https://news.google.com/rss/search?q=site:apnews.com+politics", "feed-ap-politics");
+  loadFeed("https://feeds.washingtonpost.com/rss/politics?itid=lk_inline_manual_2", "feed-wapo-politics");
+  loadFeed("https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", "feed-nyt-home");
+  loadFeed("https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml", "feed-nyt-politics");
+  loadFeed("https://saturdaydownsouth.com/feed/", "feed-sds");
+  loadFeed("https://sports.yahoo.com/college-football/rss/", "feed-yahoo");
+  loadFeed("https://pokemongohub.net/feed", "feed-pgohub");
+  loadFeed("https://www.technologyreview.com/feed/", "feed-mit-ai");
+  loadFeed("https://openai.com/blog/rss.xml", "feed-openai");
+</script>
+
+</body>
+</html>
