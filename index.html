@@ -40,6 +40,16 @@
       transform: translateY(-8px);
       box-shadow: 12px 12px 24px #bbbfc3, -12px -12px 24px #ffffff;
     }
+    .feed::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at top left, rgba(26, 85, 194, 0.1), transparent 70%);
+      transform: rotate(45deg);
+    }
     .feed h3 {
       position: relative;
       margin-top: 0;
@@ -56,13 +66,12 @@
       margin-bottom: 10px;
     }
     .feed a {
-      text-decoration: underline;
+      text-decoration: none;
       color: #1e3c72;
       font-weight: 500;
-      cursor: pointer;
     }
     .feed a:hover {
-      color: #162d57;
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -83,39 +92,34 @@
 </div>
 
 <script>
-  function loadJSONP(rssUrl, containerId) {
-    const callbackName = 'cb_' + containerId;
-    window[callbackName] = function(data) {
+  async function loadFeed(url, containerId) {
+    try {
+      const res = await fetch("https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(url));
+      const data = await res.json();
       const container = document.getElementById(containerId);
       if (!data.items) return;
-      const ul = document.createElement('ul');
+      const ul = document.createElement("ul");
       data.items.slice(0, 5).forEach(item => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = item.link;
-        a.textContent = item.title;
-        a.target = '_blank';
-        li.appendChild(a);
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
         ul.appendChild(li);
       });
       container.appendChild(ul);
-      delete window[callbackName];
-    };
-    const script = document.createElement('script');
-    script.src = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl) + '&callback=' + callbackName;
-    document.body.appendChild(script);
+    } catch (e) {
+      console.error("Failed to load feed:", url);
+    }
   }
 
-  loadJSONP('https://news.google.com/rss/search?q=site:apnews.com', 'feed-ap-top');
-  loadJSONP('https://news.google.com/rss/search?q=site:apnews.com+politics', 'feed-ap-politics');
-  loadJSONP('https://feeds.washingtonpost.com/rss/politics?itid=lk_inline_manual_2', 'feed-wapo-politics');
-  loadJSONP('https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', 'feed-nyt-home');
-  loadJSONP('https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml', 'feed-nyt-politics');
-  loadJSONP('https://saturdaydownsouth.com/feed/', 'feed-sds');
-  loadJSONP('https://sports.yahoo.com/college-football/rss/', 'feed-yahoo');
-  loadJSONP('https://pokemongohub.net/feed', 'feed-pgohub');
-  loadJSONP('https://www.technologyreview.com/feed/', 'feed-mit-ai');
-  loadJSONP('https://openai.com/blog/rss.xml', 'feed-openai');
+  loadFeed("https://news.google.com/rss/search?q=site:apnews.com", "feed-ap-top");
+  loadFeed("https://news.google.com/rss/search?q=site:apnews.com+politics", "feed-ap-politics");
+  loadFeed("https://feeds.washingtonpost.com/rss/politics?itid=lk_inline_manual_2", "feed-wapo-politics");
+  loadFeed("https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", "feed-nyt-home");
+  loadFeed("https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml", "feed-nyt-politics");
+  loadFeed("https://saturdaydownsouth.com/feed/", "feed-sds");
+  loadFeed("https://sports.yahoo.com/college-football/rss/", "feed-yahoo");
+  loadFeed("https://pokemongohub.net/feed", "feed-pgohub");
+  loadFeed("https://www.technologyreview.com/feed/", "feed-mit-ai");
+  loadFeed("https://openai.com/blog/rss.xml", "feed-openai");
 </script>
 
 </body>
