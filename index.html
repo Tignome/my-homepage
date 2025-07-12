@@ -40,19 +40,7 @@
       transform: translateY(-8px);
       box-shadow: 12px 12px 24px #bbbfc3, -12px -12px 24px #ffffff;
     }
-    .feed::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at top left, rgba(26, 85, 194, 0.1), transparent 70%);
-      transform: rotate(45deg);
-      pointer-events: none; /* allow link clicks */
-    }
     .feed h3 {
-      position: relative;
       margin-top: 0;
       margin-bottom: 15px;
       font-size: 1.4rem;
@@ -94,39 +82,45 @@
 </div>
 
 <script>
-  function loadJSONP(rssUrl, containerId) {
-    const callbackName = 'cb_' + containerId;
-    window[callbackName] = function(data) {
-      const container = document.getElementById(containerId);
-      if (!data.items) return;
-      const ul = document.createElement('ul');
-      data.items.slice(0, 5).forEach(item => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = item.link;
-        a.textContent = item.title;
-        a.target = '_blank';
-        li.appendChild(a);
-        ul.appendChild(li);
-      });
-      container.appendChild(ul);
-      delete window[callbackName];
-    };
-    const script = document.createElement('script');
-    script.src = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl) + '&callback=' + callbackName;
-    document.body.appendChild(script);
+  const feeds = {
+    'feed-ap-top': 'https://apnews.com/hub/ap-top-news',
+    'feed-ap-politics': 'https://apnews.com/hub/politics',
+    'feed-wapo-politics': 'https://feeds.washingtonpost.com/rss/politics?itid=lk_inline_manual_2',
+    'feed-nyt-home': 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+    'feed-nyt-politics': 'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml',
+    'feed-sds': 'https://saturdaydownsouth.com/feed/',
+    'feed-yahoo': 'https://sports.yahoo.com/college-football/rss/',
+    'feed-pgohub': 'https://pokemongohub.net/feed',
+    'feed-mit-ai': 'https://www.technologyreview.com/feed/',
+    'feed-openai': 'https://openai.com/blog/rss.xml'
+  };
+
+  function fetchFeed(url, containerId) {
+    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+    fetch(proxy)
+      .then(response => response.text())
+      .then(str => new window.DOMParser().parseFromString(str, 'text/xml'))
+      .then(data => {
+        const items = data.querySelectorAll('item');
+        const container = document.getElementById(containerId);
+        const ul = document.createElement('ul');
+        for (let i = 0; i < Math.min(5, items.length); i++) {
+          const title = items[i].querySelector('title').textContent;
+          const link = items[i].querySelector('link').textContent;
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = link;
+          a.textContent = title;
+          a.target = '_blank';
+          li.appendChild(a);
+          ul.appendChild(li);
+        }
+        container.appendChild(ul);
+      })
+      .catch(err => console.error('Error fetching feed:', url, err));
   }
 
-  loadJSONP('https://news.google.com/rss/search?q=site:apnews.com', 'feed-ap-top');
-  loadJSONP('https://news.google.com/rss/search?q=site:apnews.com+politics', 'feed-ap-politics');
-  loadJSONP('https://feeds.washingtonpost.com/rss/politics?itid=lk_inline_manual_2', 'feed-wapo-politics');
-  loadJSONP('https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', 'feed-nyt-home');
-  loadJSONP('https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml', 'feed-nyt-politics');
-  loadJSONP('https://saturdaydownsouth.com/feed/', 'feed-sds');
-  loadJSONP('https://sports.yahoo.com/college-football/rss/', 'feed-yahoo');
-  loadJSONP('https://pokemongohub.net/feed', 'feed-pgohub');
-  loadJSONP('https://www.technologyreview.com/feed/', 'feed-mit-ai');
-  loadJSONP('https://openai.com/blog/rss.xml', 'feed-openai');
+  Object.entries(feeds).forEach(([id, url]) => fetchFeed(url, id));
 </script>
 
 </body>
