@@ -2086,7 +2086,7 @@
 <script>
 const $=s=>document.querySelector(s),$all=s=>Array.from(document.querySelectorAll(s));
 // Lodging: Jacobo Dalevuelta 117 (Home Base)
-const CENTRO={lat:17.0624,lng:-96.7213};
+const CENTRO = {lat:17.070167,lng:-96.721278};
 function hv(a,b){const r=d=>d*Math.PI/180;if(!a||!b||!Number.isFinite(a.lat)||!Number.isFinite(a.lng)||!Number.isFinite(b.lat)||!Number.isFinite(b.lng))return NaN;const R=3958.7613,dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng),lat1=r(a.lat),lat2=r(b.lat);const h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(Math.abs(dLng)/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function fm(m){return Number.isFinite(m)?(Math.round((m+Number.EPSILON)*10)/10).toFixed(1):"–"}
 function parseISO(s){const d=new Date(s+"T00:00:00");return isNaN(d)?null:d}
@@ -2102,7 +2102,7 @@ function loadSaved(){try{const raw=localStorage.getItem(LS_KEY);return raw?JSON.
 function saveNow(){try{localStorage.setItem(LS_KEY,JSON.stringify(state))}catch(e){}}
 function scheduleSave(){clearTimeout(window._t);window._t=setTimeout(saveNow,300)}
 
-function distanceFor(a){if(Number.isFinite(a.miles))return a.miles;if(a.location&&a.location.lat!=null&&a.location.lng!=null)return hv({lat:17.0596,lng:-96.7253},a.location);return NaN}
+function distanceFor(a){if(Number.isFinite(a.miles))return a.miles;if(a.location&&a.location.lat!=null&&a.location.lng!=null)return hv(CENTRO, a.location);return NaN}
 function filtered(){const wm=state.activities.map(a=>Object.assign({},a,{miles:distanceFor(a)}));return wm.filter(a=>{if(state.filter.type!=="all"&&a.type!==state.filter.type)return false;if(state.filter.cost!=="all"&&a.cost!==state.filter.cost)return false;if(state.filter.english&&!a.english)return false;if(state.filter.transport&&!a.transportIncluded)return false;if(state.filter.requires&&!a.requiresTransport)return false;const within=state.filter.ignore?true:(Number.isFinite(state.filter.maxMiles)?a.miles<=state.filter.maxMiles:true);const special=(a.type==="archaeological"||a.type==="natural")?a.miles<=35:false;if(!(within||special))return false;return true})}
 
 function buildPlan(len){const old=state.plan||[];state.plan=Array.from({length:len},(_,i)=>old[i]||({Morning:[],Afternoon:[],Evening:[]}));if(state.selectedDay>=len)state.selectedDay=0;scheduleSave()}
@@ -2232,7 +2232,7 @@ function setImportStatus(msg){ if(importStatus){ importStatus.textContent = msg 
 // Map
 
 let map, layerGroup;
-function openMap(){const acts=filtered();const pts=acts.filter(a=>a&&a.location&&Number.isFinite(a.location.lat)&&Number.isFinite(a.location.lng)).map(a=>({name:a.name,lat:a.location.lat,lng:a.location.lng,url:a.url||"",type:a.type||"",cost:a.cost||""}));$("#mapModal").style.display="flex";setTimeout(()=>{if(!map){map=L.map('modalMap').setView([17.0624,-96.7213],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);layerGroup=L.featureGroup().addTo(map);}layerGroup.clearLayers();L.marker([17.0624,-96.7213],{title:'Home Base'}).addTo(layerGroup).bindPopup('<strong>Home Base</strong><br>Jacobo Dalevuelta 117');pts.forEach(p=>{const html = `<strong>${p.name}</strong><br>${p.type?('Type: '+p.type+'<br>'):""}${p.cost?('Cost: '+p.cost+'<br>'):""}${p.url?('<a href="'+p.url+'" target="_blank" rel="noopener">Official Homepage</a><br>'):""}<a href="https://www.google.com/maps/dir/?api=1&origin=17.0596,-96.7253&destination=${p.lat},${p.lng}" target="_blank" rel="noopener">Directions</a>`;L.marker([p.lat,p.lng]).addTo(layerGroup).bindPopup(html);});if(pts.length){map.fitBounds(layerGroup.getBounds().pad(0.2));}setTimeout(()=>map.invalidateSize(),100);},50);}
+function openMap(){const acts=filtered();const pts=acts.filter(a=>a&&a.location&&Number.isFinite(a.location.lat)&&Number.isFinite(a.location.lng)).map(a=>({name:a.name,lat:a.location.lat,lng:a.location.lng,url:a.url||"",type:a.type||"",cost:a.cost||""}));$("#mapModal").style.display="flex";setTimeout(()=>{if(!map){map=L.map('modalMap').setView([CENTRO.lat, CENTRO.lng],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);layerGroup=L.featureGroup().addTo(map);}layerGroup.clearLayers();L.marker([CENTRO.lat, CENTRO.lng],{title:'Home Base'}).addTo(layerGroup).bindPopup('<strong>Home Base</strong><br>Jacobo Dalevuelta 117');pts.forEach(p=>{const html = `<strong>${p.name}</strong><br>${p.type?('Type: '+p.type+'<br>'):""}${p.cost?('Cost: '+p.cost+'<br>'):""}${p.url?('<a href="'+p.url+'" target="_blank" rel="noopener">Official Homepage</a><br>'):""}<a href="https://www.google.com/maps/dir/?api=1&origin=\${CENTRO.lat},\${CENTRO.lng}&destination=${p.lat},${p.lng}" target="_blank" rel="noopener">Directions</a>`;L.marker([p.lat,p.lng]).addTo(layerGroup).bindPopup(html);});if(pts.length){map.fitBounds(layerGroup.getBounds().pad(0.2));}setTimeout(()=>map.invalidateSize(),100);},50);}
 function closeMap(){ $("#mapModal").style.display="none"; }
 $("#btnMap").addEventListener("click",e=>{e.preventDefault();openMap();});
 $("#btnClose").addEventListener("click",closeMap);
@@ -2243,12 +2243,12 @@ $("#btnOpenInNew").addEventListener("click",()=>{
   const u=URL.createObjectURL(new Blob([`
   <html><head><meta charset="utf-8"><title>Map</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#m{height:100%;margin:0}</style></head><body><div id="m"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script><script>
   const pts = JSON.parse(decodeURIComponent('${payload}'));
-  const map=L.map('m').setView([17.0624,-96.7213],13);
+  const map=L.map('m').setView([CENTRO.lat, CENTRO.lng],13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
   const g=L.featureGroup().addTo(map);
-  L.marker([17.0624,-96.7213]).addTo(g).bindPopup('<strong>Home Base</strong><br>Jacobo Dalevuelta 117');
+  L.marker([17.070167,-96.721278]).addTo(g).bindPopup('<strong>Home Base</strong><br>Jacobo Dalevuelta 117');
   pts.forEach(p=>{
-    const html = '<strong>'+p.name+'</strong><br>'+(p.type?('Type: '+p.type+'<br>'):'')+(p.cost?('Cost: '+p.cost+'<br>'):'')+(p.url?('<a href="'+p.url+'" target="_blank" rel="noopener">Official Homepage</a><br>'):'')+'<a href="https://www.google.com/maps/dir/?api=1&origin=17.0596,-96.7253&destination='+p.lat+','+p.lng+'" target="_blank" rel="noopener">Directions</a>';
+    const html = '<strong>'+p.name+'</strong><br>'+(p.type?('Type: '+p.type+'<br>'):'')+(p.cost?('Cost: '+p.cost+'<br>'):'')+(p.url?('<a href="'+p.url+'" target="_blank" rel="noopener">Official Homepage</a><br>'):'')+'<a href="https://www.google.com/maps/dir/?api=1&origin=17.070167,-96.721278&destination='+p.lat+','+p.lng+'" target="_blank" rel="noopener">Directions</a>';
     L.marker([p.lat,p.lng]).addTo(g).bindPopup(html);
   });
   if(pts.length){ map.fitBounds(g.getBounds().pad(0.2)); }
